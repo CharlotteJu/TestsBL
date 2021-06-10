@@ -89,7 +89,6 @@ public class MainActivity extends AppCompatActivity {
                 list.clear();
                 list.addAll(results);
                 String debug = "";
-
             }
         });*/
 
