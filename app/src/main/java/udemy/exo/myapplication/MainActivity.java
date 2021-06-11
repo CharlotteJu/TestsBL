@@ -92,6 +92,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });*/
 
+        String test1  = "";
+
     }
 
     private void addTask(){
