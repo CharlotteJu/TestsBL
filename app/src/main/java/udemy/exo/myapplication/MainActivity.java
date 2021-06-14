@@ -14,7 +14,10 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.realm.OrderedCollectionChangeSet;
+import io.realm.OrderedRealmCollectionChangeListener;
 import io.realm.Realm;
+import io.realm.RealmQuery;
 import io.realm.RealmResults;
 
 public class MainActivity extends AppCompatActivity {
@@ -29,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private List<Task> list;
 
     private EditText nameEdit, ageEdit, speciesEdit, ownerEdit;
-    private FloatingActionButton fab;
+    private FloatingActionButton fab, fabFilter;
     private RecyclerView rcv;
 
 
@@ -48,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
         speciesEdit = findViewById(R.id.edit_species);
         ownerEdit = findViewById(R.id.edit_owner);
         fab = findViewById(R.id.fab);
+        fabFilter = findViewById(R.id.fab_filter);
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -55,6 +59,9 @@ public class MainActivity extends AppCompatActivity {
                 addTask();
             }
         });
+
+        fabFilter.setOnClickListener(view -> getResultsWithFilter());
+
 
         realm = Realm.getDefaultInstance();
         getResults();
@@ -78,6 +85,16 @@ public class MainActivity extends AppCompatActivity {
     private void getResults(){
 
         RealmResults<Task> results = realm.where(Task.class).findAll();
+
+        OrderedRealmCollectionChangeListener<RealmResults<Task>> listener = new OrderedRealmCollectionChangeListener<RealmResults<Task>>() {
+            @Override
+            public void onChange(RealmResults<Task> tasks, OrderedCollectionChangeSet changeSet) {
+                String debug = "";
+            }
+        };
+        results.addChangeListener(listener);
+
+
         list.clear();
         list.addAll(realm.copyFromRealm(results));
         String debug = "";
@@ -99,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
     private void addTask(){
         getInfos();
         Task task = new Task(name, age, species, owner);
+        realm = Realm.getDefaultInstance();
         realm.beginTransaction();
         try {
             realm.copyToRealmOrUpdate(task);
@@ -110,5 +128,28 @@ public class MainActivity extends AppCompatActivity {
             getResults();
             realm.close();
         }
+    }
+
+    private void getResultsWithFilter(){
+
+        RealmQuery<Task> query = realm.where(Task.class);
+        RealmResults<Task> results = query.rawPredicate("age = 1 OR age = 2").findAll();
+
+        OrderedRealmCollectionChangeListener<RealmResults<Task>> listener = new OrderedRealmCollectionChangeListener<RealmResults<Task>>() {
+            @Override
+            public void onChange(RealmResults<Task> tasks, OrderedCollectionChangeSet changeSet) {
+                String debug = "";
+            }
+        };
+        results.addChangeListener(listener);
+
+
+        String debug2 = "";
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        realm.close();
     }
 }
